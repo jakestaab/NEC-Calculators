@@ -17,6 +17,10 @@ from solar_lib import NECTables as NEC
 from solar_lib import NECTablesConduitFill as NEC_CF
 from solar_lib import NECTablesWireDerate as NEC_WD
 
+window = Tk()
+window.title("Voltage Drop")
+window.geometry("900x635")
+
 #-----------------------------------------------------------------------
 #VOLTAGE DROP
 
@@ -32,28 +36,21 @@ def finalCalc(phase, material, current, length, voltage, wiresize):
 	
 #prints the output of finalCalc to the interface	
 def print_vd():
-	finalVD = "Voltage Drop:  " + str(finalCalc(phase.get(), material.get(), int(currentvar.get()), int(lengthvar.get()), int(voltagevar.get()), wiresize.get())) + "%"
+	finalVD = "Voltage Drop:  " + str(finalCalc(vd_phase.get(), material.get(), int(vd_currentvar.get()), int(vd_lengthvar.get()), int(vd_voltagevar.get()), vd_wiresize.get())) + "%"
 	voltage_drop.configure(text=finalVD)
-	
-def awg_combo(event):
-	global awg
-	awg = NEC.awg_to_circmils[wiresize.get()]
 
 def awg_combo(event):
 	global awg
-	awg = NEC.awg_to_circmils[wiresize.get()]
+	awg = NEC.awg_to_circmils[vd_wiresize.get()]
 
-window = Tk()
-window.title("Voltage Drop")
-window.geometry("900x500")
 vd_header = Label(window, text="VOLTAGE DROP", font=("Courier", 18))
 vd_header.grid(column=0, row=0)
 
 material = tk.DoubleVar()
-phase = tk.DoubleVar()
-lengthvar = tk.StringVar()
-voltagevar = tk.StringVar()
-currentvar = tk.StringVar()
+vd_phase = tk.DoubleVar()
+vd_lengthvar = tk.StringVar()
+vd_voltagevar = tk.StringVar()
+vd_currentvar = tk.StringVar()
 
 material_lbl = Label(window, text="Conductor Material:")
 material_lbl.grid(column=0, row=1)
@@ -64,39 +61,41 @@ aluminum.grid(column=0, row=3)
 
 size_lbl = Label(window, text="Conductor Size")
 size_lbl.grid(column=1, row=1)
-wiresize = Combobox(window)
-wiresize.grid(column=1, row=2)
-wiresize['values'] = (12, 10, 8, 6, 4, 3, 2, 1, "1/0", "2/0", "3/0", "4/0", "250 kcmil", "300 kcmil", "350 kcmil", "400 kcmil", "450 kcmil", "500 kcmil")
-wiresize.bind("<<ComboboxSelected>>", awg_combo)
+vd_wiresize = Combobox(window)
+vd_wiresize.grid(column=1, row=2)
+vd_wiresize['values'] = (12, 10, 8, 6, 4, 3, 2, 1, "1/0", "2/0", "3/0", "4/0", "250 kcmil", "300 kcmil", "350 kcmil", "400 kcmil", "450 kcmil", "500 kcmil")
+vd_wiresize.bind("<<ComboboxSelected>>", awg_combo)
 
 length_lbl = Label(window, text="Circuit Length (ft.)")
 length_lbl.grid(column=2, row=1)
-length = Entry(window, width=15, textvariable=lengthvar)
+length = Entry(window, width=15, textvariable=vd_lengthvar)
 length.grid(column=2, row=2)
 
 current_lbl = Label(window, text="Current")
 current_lbl.grid(column=3, row=1)
-current = Entry(window, width=10, textvariable=currentvar)
+current = Entry(window, width=10, textvariable=vd_currentvar)
 current.grid(column=3, row=2)
 
 voltage_lbl = Label(window, text="Voltage")
 voltage_lbl.grid(column=4, row=1)
-voltage = Entry(window, width=10, textvariable=voltagevar)
+voltage = Entry(window, width=10, textvariable=vd_voltagevar)
 voltage.grid(column=4, row=2)
 
 phase_lbl = Label(window, text="Phase")
 phase_lbl.grid(column=5, row=1)
-phase_1 = Radiobutton(window, text="1", variable=phase, value=2)
+phase_1 = Radiobutton(window, text="1", variable=vd_phase, value=2)
 phase_1.grid(column=5, row=2)
-phase_3 = Radiobutton(window, text="3", variable=phase, value=1.732)
+phase_3 = Radiobutton(window, text="3", variable=vd_phase, value=1.732)
 phase_3.grid(column=5, row=3)
 
-
-calculate = Button(window, text="Calculate", command=finalCalc)
+calculate = Button(window, text="Calculate", command=print_vd)
 calculate.grid(column=0, row=4)
 
-voltage_drop = Label(window, text="%")
+voltage_drop = Label(window, text="----")
 voltage_drop.grid(column=1, row=4)
+
+vd_spacer = Label(window, text=" ", font=("Courier", 18))
+vd_spacer.grid(column=0, row=6, pady=30)
 
 #-----------------------------------------------------------------------
 #CONDUIT FILL
@@ -165,64 +164,67 @@ def manual_cf():
 
 
 cf_header = Label(window, text="CONDUIT FILL", font=("Courier", 18))
-cf_header.grid(column=0, row=6)
+cf_header.grid(column=0, row=7)
 
 no_of_conductors = tk.StringVar()
 
 cf_size_lbl = Label(window, text="Conductor Size")
-cf_size_lbl.grid(column=0, row=7)
+cf_size_lbl.grid(column=0, row=8)
 cf_wiresize = Combobox(window)
-cf_wiresize.grid(column=0, row=8)
+cf_wiresize.grid(column=0, row=9)
 cf_wiresize['values'] = (12, 10, 8, 6, 4, 3, 2, 1, "1/0", "2/0", "3/0", "4/0", "250 kcmil", "300 kcmil", "350 kcmil", "400 kcmil", "500 kcmil")
 cf_wiresize.bind("<<ComboboxSelected>>", insulation_combo)
 
 conductor_count_lbl = Label(window, text="No. of Conductors")
-conductor_count_lbl.grid(column=1, row=7)
+conductor_count_lbl.grid(column=1, row=8)
 conductor_count = Entry(window, width=10, textvariable=no_of_conductors)
-conductor_count.grid(column=1, row=8)
+conductor_count.grid(column=1, row=9)
 
 insulation_lbl = Label(window, text="Insulation Type")
-insulation_lbl.grid(column=2, row=7)
+insulation_lbl.grid(column=2, row=8)
 insulation = Combobox(window)
-insulation.grid(column=2, row=8)
+insulation.grid(column=2, row=9)
 insulation['values'] = ("PV", "THHN")
 insulation.bind("<<ComboboxSelected>>", insulation_combo)
 
 ground_lbl = Label(window, text="Ground Size")
-ground_lbl.grid(column=3, row=7)
+ground_lbl.grid(column=3, row=8)
 ground = Combobox(window)
-ground.grid(column=3, row=8)
+ground.grid(column=3, row=9)
 ground['values'] = ("10", "8", "6", "4", "3", "2", "1", "1/0", "2/0", "3/0")
 ground.bind("<<ComboboxSelected>>", insulation_combo)
 
 conduit_lbl = Label(window, text="Conduit Type")
-conduit_lbl.grid(column=4, row=7)
+conduit_lbl.grid(column=4, row=8)
 conduit = Combobox(window)
-conduit.grid(column=4, row=8)
+conduit.grid(column=4, row=9)
 conduit['values'] = ("EMT", "PVC")
 conduit.bind("<<ComboboxSelected>>", conduit_combo)
 
 cf_calculate = Button(window, text="Calculate", command=conduit_fill_calc)
-cf_calculate.grid(column=0, row=9)
+cf_calculate.grid(column=0, row=10)
 
-conduit_fill_percentage = Label(window, text="%")
-conduit_fill_percentage.grid(column=1, row=9)
+conduit_fill_percentage = Label(window, text="----")
+conduit_fill_percentage.grid(column=1, row=10)
 
 cf_manual_header = Label(window, text="Preferred size:", font=("Courier", 12))
-cf_manual_header.grid(column=0, row=10)
+cf_manual_header.grid(column=0, row=11)
 
 manual_conduit_size = Label(window, text="Manual Conduit Size")
-manual_conduit_size.grid(column=0, row=11)
+manual_conduit_size.grid(column=0, row=12)
 conduit_manual = Combobox(window)
-conduit_manual.grid(column=0, row=12)
+conduit_manual.grid(column=0, row=13)
 conduit_manual['values'] = ("1/2\"", "3/4\"", "1\"", "1-1/4\"", "1-1/2\"", "2\"", "2-1/2\"", "3\"", "3-1/2\"", "4\"")
 conduit_manual.bind("<<ComboboxSelected>>", insulation_combo)
 
 manual_cf_calculate = Button(window, text="Calculate", command=manual_cf)
-manual_cf_calculate.grid(column=1, row=12)
+manual_cf_calculate.grid(column=1, row=13)
 
-manual_fill_percentage = Label(window, text="%")
-manual_fill_percentage.grid(column=2, row=12)
+manual_fill_percentage = Label(window, text="----")
+manual_fill_percentage.grid(column=2, row=13)
+
+cf_spacer = Label(window, text=" ", font=("Courier", 18))
+cf_spacer.grid(column=0, row=14, pady=30)
 
 #-----------------------------------------------------------------------
 #WIRE DERATE
@@ -297,7 +299,7 @@ def wd_final():
 	cu_wire_size.configure(text=wd_string)
 	
 wd_header = Label(window, text="WIRE SIZING", font=("Courier", 18))
-wd_header.grid(column=0, row=13)
+wd_header.grid(column=0, row=15)
 
 wd_currentvar = tk.StringVar()
 wd_cond_countvar = tk.StringVar()
@@ -306,38 +308,38 @@ wd_temp = tk.StringVar()
 wd_continuousvar = tk.StringVar()
 
 wd_base_current = Label(window, text="Current")
-wd_base_current.grid(column=0, row=14)
+wd_base_current.grid(column=0, row=16)
 wd_currentvar = Entry(window, width=10, textvariable=wd_currentvar)
-wd_currentvar.grid(column=0, row=15)
+wd_currentvar.grid(column=0, row=17)
 
 wd_cond_count = Label(window, text="No. of Curr. Carrying Cond.")
-wd_cond_count.grid(column=1, row=14)
+wd_cond_count.grid(column=1, row=16)
 wd_cond_countvar = Entry(window, width=10, textvariable=wd_cond_countvar)
-wd_cond_countvar.grid(column=1, row=15)
+wd_cond_countvar.grid(column=1, row=17)
 
 wd_insulation_lbl = Label(window, text="Insulation Type")
-wd_insulation_lbl.grid(column=2, row=14)
+wd_insulation_lbl.grid(column=2, row=16)
 wd_insulation = Combobox(window)
-wd_insulation.grid(column=2, row=15)
+wd_insulation.grid(column=2, row=17)
 wd_insulation['values'] = ("PV", "THHN")
 
 wd_temperature_lbl = Label(window, text="Ambient Temp (F)")
-wd_temperature_lbl.grid(column=3, row=14)
+wd_temperature_lbl.grid(column=3, row=16)
 wd_temp = Entry(window, width=10, textvariable=wd_temp)
-wd_temp.grid(column=3, row=15)
+wd_temp.grid(column=3, row=17)
 
 wd_continuous = Label(window, text="Continuous Load?")
-wd_continuous.grid(column=4, row=14)
+wd_continuous.grid(column=4, row=16)
 wd_cont_yes = Radiobutton(window, text="Yes", variable=wd_continuousvar, value='Y')
-wd_cont_yes.grid(column=4, row=15)
+wd_cont_yes.grid(column=4, row=17)
 wd_cont_no = Radiobutton(window, text="No", variable=material, value='N')
-wd_cont_no.grid(column=4, row=16)
+wd_cont_no.grid(column=4, row=18)
 
 wd_cu_calculate = Button(window, text="Calculate", command=wd_final)
-wd_cu_calculate.grid(column=0, row=18)
+wd_cu_calculate.grid(column=0, row=20)
 
-cu_wire_size = Label(window, text="size")
-cu_wire_size.grid(column = 1, row=18)
+cu_wire_size = Label(window, text="----")
+cu_wire_size.grid(column = 1, row=20)
 
 
 window.mainloop()
