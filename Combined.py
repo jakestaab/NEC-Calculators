@@ -4,7 +4,7 @@
 #Voltage Drop, Conduit Fill, and Wire Derate (Wire Select).
 #Interface allows for manipulation of input variables to be
 #modified in real time.
-#
+
 #Requires companion file "solar_lib.py" which contains NEC 2017
 #table information for ampacity, derate factors, wire cross-sectional area
 #circular mils, conduit trade size and associated cross-sectional area
@@ -17,9 +17,10 @@ from solar_lib import NECTables as NEC
 from solar_lib import NECTablesConduitFill as NEC_CF
 from solar_lib import NECTablesWireDerate as NEC_WD
 
+
 window = Tk()
-window.title("Voltage Drop")
-window.geometry("900x635")
+window.title("Electrical Calculators")
+window.geometry("900x700")
 
 #-----------------------------------------------------------------------
 #VOLTAGE DROP
@@ -29,21 +30,23 @@ window.geometry("900x635")
 def finalCalc(phase, material, current, length, voltage, wiresize):
 	numerator = (phase * material * current * length)
 	denominator = NEC.awg_to_circmils[wiresize]
-	operating_voltage = voltage - (numerator / denominator)
-	percentage = operating_voltage / voltage
+	resulting_voltage = voltage - (numerator / denominator)
+	percentage = resulting_voltage / voltage
 	final = round(((1 - percentage) * 100), 3)
 	return final
 	
 #prints the output of finalCalc to the interface	
 def print_vd():
-	finalVD = "Voltage Drop:  " + str(finalCalc(vd_phase.get(), material.get(), int(vd_currentvar.get()), int(vd_lengthvar.get()), int(vd_voltagevar.get()), vd_wiresize.get())) + "%"
+	finalVD = "Voltage Drop:  " + str(finalCalc(vd_phase.get(), material.get(),
+	int(vd_currentvar.get()), int(vd_lengthvar.get()), int(vd_voltagevar.get()),
+	vd_wiresize.get())) + "%"
 	voltage_drop.configure(text=finalVD)
 
 def awg_combo(event):
 	global awg
 	awg = NEC.awg_to_circmils[vd_wiresize.get()]
 
-vd_header = Label(window, text="VOLTAGE DROP", font=("Courier", 18))
+vd_header = Label(window, text="VOLTAGE DROP", font=("Verdana", 18))
 vd_header.grid(column=0, row=0)
 
 material = tk.DoubleVar()
@@ -63,7 +66,10 @@ size_lbl = Label(window, text="Conductor Size")
 size_lbl.grid(column=1, row=1)
 vd_wiresize = Combobox(window)
 vd_wiresize.grid(column=1, row=2)
-vd_wiresize['values'] = (12, 10, 8, 6, 4, 3, 2, 1, "1/0", "2/0", "3/0", "4/0", "250 kcmil", "300 kcmil", "350 kcmil", "400 kcmil", "450 kcmil", "500 kcmil")
+vd_wiresize['values'] = (12, 10, 8, 6, 4, 3, 2, 1, "1/0", "2/0", "3/0",
+"4/0", "250 kcmil", "300 kcmil", "350 kcmil", "400 kcmil", "450 kcmil",
+"500 kcmil", "600 kcmil", "700 kcmil", "750 kcmil", "800 kcmil", "900 kcmil",
+"1000 kcmil", "1250 kcmil", "1500 kcmil", "1750 kcmil", "2000 kcmil")
 vd_wiresize.bind("<<ComboboxSelected>>", awg_combo)
 
 length_lbl = Label(window, text="Circuit Length (ft.)")
@@ -116,7 +122,9 @@ def insulation_combo(event):
 	elif insulation.get() == "THHN":
 		insulation_area = NEC_CF.thhn_awg_to_area[cf_wiresize.get()]
 		ground_area = NEC_CF.thhn_awg_to_area[ground.get()]
-	
+	elif insulation.get() == "RHW":
+		insulation_area = NEC_CF.rhw_awg_to_area[cf_wiresize.get()]
+		ground_area = NEC_CF.rhw_awg_to_area[ground.get()]
 def conduit_combo(event):
 	global conduit_type
 
@@ -153,17 +161,17 @@ def manual_cf():
 		for key, value in NEC_CF.emt_dict.items():
 			if value == conduit_manual.get():
 				manual = (conductor_area / key) * 100
-		manual_fill_string = "Total Fill: " + str(round(manual, 1)) + "% in "
+		manual_fill_string = "Total Fill: " + str(round(manual, 1)) + "%"
 		manual_fill_percentage.configure(text=manual_fill_string)
 	elif conduit.get() == 'PVC':
 		for key, value in NEC_CF.pvc_dict.items():
 			if value == conduit_manual.get():
 				manual = (conductor_area / key) * 100
-		manual_fill_string = "Total Fill: " + str(round(manual, 1)) + "% in "
+		manual_fill_string = "Total Fill: " + str(round(manual, 1)) + "%"
 		manual_fill_percentage.configure(text=manual_fill_string)
 
 
-cf_header = Label(window, text="CONDUIT FILL", font=("Courier", 18))
+cf_header = Label(window, text="CONDUIT FILL", font=("Verdana", 18))
 cf_header.grid(column=0, row=7)
 
 no_of_conductors = tk.StringVar()
@@ -172,7 +180,9 @@ cf_size_lbl = Label(window, text="Conductor Size")
 cf_size_lbl.grid(column=0, row=8)
 cf_wiresize = Combobox(window)
 cf_wiresize.grid(column=0, row=9)
-cf_wiresize['values'] = (12, 10, 8, 6, 4, 3, 2, 1, "1/0", "2/0", "3/0", "4/0", "250 kcmil", "300 kcmil", "350 kcmil", "400 kcmil", "500 kcmil")
+cf_wiresize['values'] = (12, 10, 8, 6, 4, 3, 2, 1, "1/0", "2/0", "3/0",
+"4/0", "250 kcmil", "300 kcmil", "350 kcmil", "400 kcmil", "500 kcmil",
+"600 kcmil", "700 kcmil", "750 kcmil", "800 kcmil", "900 kcmil", "1000 kcmil")
 cf_wiresize.bind("<<ComboboxSelected>>", insulation_combo)
 
 conductor_count_lbl = Label(window, text="No. of Conductors")
@@ -184,7 +194,7 @@ insulation_lbl = Label(window, text="Insulation Type")
 insulation_lbl.grid(column=2, row=8)
 insulation = Combobox(window)
 insulation.grid(column=2, row=9)
-insulation['values'] = ("PV", "THHN")
+insulation['values'] = ("PV", "THHN", "RHW")
 insulation.bind("<<ComboboxSelected>>", insulation_combo)
 
 ground_lbl = Label(window, text="Ground Size")
@@ -298,7 +308,7 @@ def wd_final():
 	wd_string = "Copper: " + str(cu_wire_select(final_calc())[0]) + "\nAluminum: " + str(al_wire_select(final_calc())[0])
 	cu_wire_size.configure(text=wd_string)
 	
-wd_header = Label(window, text="WIRE SIZING", font=("Courier", 18))
+wd_header = Label(window, text="WIRE SIZING", font=("Verdana", 18))
 wd_header.grid(column=0, row=15)
 
 wd_currentvar = tk.StringVar()
@@ -341,5 +351,38 @@ wd_cu_calculate.grid(column=0, row=20)
 cu_wire_size = Label(window, text="----")
 cu_wire_size.grid(column = 1, row=20)
 
+
+#For calculation of parallel conductors
+def manual_sets(event):
+	global sets
+	sets = wd_parallel_manual.get()
+
+def manual_parallel():
+	dev_current = final_calc() / int(sets)
+	parallel_final_string = "Copper: " + str(cu_wire_select(dev_current)[0]) + "\nAluminum: " + str(al_wire_select(dev_current)[0])
+	parallel_final.configure(text=parallel_final_string)
+	if (cu_wire_select(dev_current)[1] < 130):
+		warning = "***WARNING***\nParallel conductors must be\n1/0 and larger.\n2017 NEC 310.10(H)"
+		parallel_warning.configure(text=warning)
+
+
+wd_parallel = Label(window, text="Parallel Sets", font=("Courier", 12))
+wd_parallel.grid(column=0, row=21)
+wd_parallel_manual = Combobox(window)
+wd_parallel_manual.grid(column=0, row=22)
+wd_parallel_manual['values'] = (2, 3, 4, 5, 6, 7, 8)
+wd_parallel_manual.bind("<<ComboboxSelected>>", manual_sets)
+
+wd_parallel_calculate = Button(window, text="Calculate Parallel Size", command=manual_parallel)
+wd_parallel_calculate.grid(column=1, row=22)
+
+parallel_final = Label(window, text="----")
+parallel_final.grid(column=2, row=22)
+
+cf_spacer = Label(window, text=" ", font=("Courier", 18))
+cf_spacer.grid(column=0, row=23, pady=30)
+
+parallel_warning = Label(window, text="", font=("Courier", 8))
+parallel_warning.grid(column=3, row=22)
 
 window.mainloop()
